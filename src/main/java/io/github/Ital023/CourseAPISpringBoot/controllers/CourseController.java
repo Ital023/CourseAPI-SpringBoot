@@ -4,12 +4,16 @@ import io.github.Ital023.CourseAPISpringBoot.domain.course.CourseDTO;
 import io.github.Ital023.CourseAPISpringBoot.domain.course.CourseEntity;
 import io.github.Ital023.CourseAPISpringBoot.domain.course.CourseRepository;
 import io.github.Ital023.CourseAPISpringBoot.domain.course.CourseStatus;
+import io.github.Ital023.CourseAPISpringBoot.services.CourseService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/courses")
@@ -17,6 +21,8 @@ public class CourseController {
 
     @Autowired
     private CourseRepository courseRepository;
+    @Autowired
+    private CourseService courseService;
 
     @PostMapping
     public ResponseEntity create(@RequestBody CourseDTO courseDTO){
@@ -50,5 +56,30 @@ public class CourseController {
         return ResponseEntity.ok().body(coursesByName);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity delete(@PathVariable UUID id){
+        courseRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/active")
+    @Transactional
+    public ResponseEntity toggleActive(@PathVariable UUID id){
+        Optional<CourseEntity> courseOptional = courseRepository.findById(id);
+
+        if(courseOptional.isEmpty()){
+            return ResponseEntity.badRequest().body("Usuario nao existe");
+        }
+
+        CourseEntity course = courseOptional.get();
+
+        if(course.getActive().equals(CourseStatus.ACTIVE.getDescription())){
+            course.setActive(CourseStatus.DESACTIVE.getDescription());
+        }else{
+            course.setActive(CourseStatus.ACTIVE.getDescription());
+        }
+
+        return ResponseEntity.noContent().build();
+    }
 
 }
