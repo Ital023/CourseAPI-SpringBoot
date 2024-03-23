@@ -33,9 +33,22 @@ public class CourseController {
         return ResponseEntity.ok().body(course);
     }
 
-    @GetMapping("/active/allCourses")
+    @GetMapping
+    public ResponseEntity<List<CourseEntity>> allCourses(){
+        return ResponseEntity.ok().body(courseRepository.findAll());
+    }
+
+    @GetMapping("/active/")
     public ResponseEntity<List<CourseEntity>> allActive(){
         List<CourseEntity> coursesActive = courseRepository.findByActive(CourseStatus.ACTIVE.getDescription());
         return ResponseEntity.ok().body(coursesActive);
     }
+
+    @GetMapping("/name/{name}")
+    public ResponseEntity<List<CourseEntity>> byName(@PathVariable String name){
+        List<CourseEntity> coursesByName = courseRepository.findByName(name);
+        return ResponseEntity.ok().body(coursesByName);
+    }
+
+
 }
