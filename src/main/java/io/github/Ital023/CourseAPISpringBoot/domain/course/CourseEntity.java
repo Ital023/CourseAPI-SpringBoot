@@ -29,8 +29,7 @@ public class CourseEntity {
     @NotNull
     private String category;
     @Autowired
-    @Column(name = "active")
-    private String courseStatus;
+    private String active;
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;

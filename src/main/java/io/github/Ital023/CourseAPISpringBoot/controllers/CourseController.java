@@ -7,10 +7,9 @@ import io.github.Ital023.CourseAPISpringBoot.domain.course.CourseStatus;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/courses")
@@ -25,12 +24,18 @@ public class CourseController {
         CourseEntity course = CourseEntity.builder()
                 .name(courseDTO.name())
                 .category(courseDTO.category())
-                .courseStatus(CourseStatus.ACTIVE.getDescription())
+                .active(CourseStatus.ACTIVE.getDescription())
                 .build();
 
         System.out.println(course);
 
         courseRepository.save(course);
         return ResponseEntity.ok().body(course);
+    }
+
+    @GetMapping("/active/allCourses")
+    public ResponseEntity<List<CourseEntity>> allActive(){
+        List<CourseEntity> coursesActive = courseRepository.findByActive(CourseStatus.ACTIVE.getDescription());
+        return ResponseEntity.ok().body(coursesActive);
     }
 }
