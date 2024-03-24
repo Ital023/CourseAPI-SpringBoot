@@ -52,7 +52,6 @@ public class CourseService {
 
     public List<CourseEntity> byCategory(String category){
         List<CourseEntity> coursesByCategory = courseRepository.findByCategory(category.toUpperCase());
-        if()
         return coursesByCategory;
     }
 
