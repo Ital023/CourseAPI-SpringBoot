@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,95 +20,60 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/courses")
 public class CourseController {
-
-    @Autowired
-    private CourseRepository courseRepository;
     @Autowired
     private CourseService courseService;
 
     @PostMapping
-    public ResponseEntity create(@RequestBody CourseDTO courseDTO){
+    public ResponseEntity create(@RequestBody CourseDTO courseDTO, UriComponentsBuilder uriBuilder){
+        CourseEntity course =  courseService.create(courseDTO);
 
-        CourseEntity course = CourseEntity.builder()
-                .name(courseDTO.name())
-                .category(courseDTO.category())
-                .active(CourseStatus.ACTIVE.getDescription())
-                .build();
+        var uri = uriBuilder.path("/courses/{id}")
+                .buildAndExpand(course.getId()).toUri();
 
-        System.out.println(course);
-
-        courseRepository.save(course);
-        return ResponseEntity.ok().body(course);
+        return ResponseEntity.created(uri).body(course);
     }
 
     @GetMapping
     public ResponseEntity<List<CourseEntity>> allCourses(){
-        return ResponseEntity.ok().body(courseRepository.findAll());
+        return ResponseEntity.ok().body(courseService.allCourses());
     }
 
+    //Todos os cursos ativos da plataforma
     @GetMapping("/active/")
-    public ResponseEntity<List<CourseEntity>> allActive(){
-        List<CourseEntity> coursesActive = courseRepository.findByActive(CourseStatus.ACTIVE.getDescription());
-        return ResponseEntity.ok().body(coursesActive);
+    public ResponseEntity<List<CourseEntity>> allActive(){;
+        return ResponseEntity.ok().body(courseService.allActive());
     }
 
-    @GetMapping("/name/{name}")
-    public ResponseEntity<List<CourseEntity>> byName(@PathVariable String name){
-        List<CourseEntity> coursesByName = courseRepository.findByName(name);
-        return ResponseEntity.ok().body(coursesByName);
+    //Todos os curos apartir do nome
+    @GetMapping("/body")
+    public ResponseEntity<List<CourseEntity>> byName(@RequestBody CourseDTO courseDTO){
+
+        if(courseService.nameIsNotNull(courseDTO)){
+            return ResponseEntity.ok().body(courseService.byName(courseDTO.name()));
+        }
+
+        return ResponseEntity.ok().body(courseService.byCategory(courseDTO.category()));
     }
+
 
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity alter(@PathVariable UUID id,@RequestBody CourseDTO courseDTO){
-
-        Optional<CourseEntity> courseOptional = courseRepository.findById(id);
-
-        if(courseOptional.isEmpty()){
-            return ResponseEntity.notFound().build();
-        }
-
-        CourseEntity course = courseOptional.get();
-
-        if(courseDTO.name() != null && courseDTO.category() != null){
-            course.setName(courseDTO.name());
-            course.setCategory(courseDTO.category());
-        }
-        else if(courseDTO.name() == null){
-            course.setCategory(courseDTO.category());
-        }else{
-            course.setName(courseDTO.name());
-        }
-
-        return ResponseEntity.noContent().build();
+        return courseService.alter(id,courseDTO);
     }
 
 
 
     @DeleteMapping("/{id}")
     public ResponseEntity delete(@PathVariable UUID id){
-        courseRepository.deleteById(id);
+        courseService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/active")
     @Transactional
     public ResponseEntity toggleActive(@PathVariable UUID id){
-        Optional<CourseEntity> courseOptional = courseRepository.findById(id);
-
-        if(courseOptional.isEmpty()){
-            return ResponseEntity.badRequest().body("Usuario nao existe");
-        }
-
-        CourseEntity course = courseOptional.get();
-
-        if(course.getActive().equals(CourseStatus.ACTIVE.getDescription())){
-            course.setActive(CourseStatus.DESACTIVE.getDescription());
-        }else{
-            course.setActive(CourseStatus.ACTIVE.getDescription());
-        }
-
-        return ResponseEntity.noContent().build();
+        return courseService.toggleActive(id);
     }
 
 }

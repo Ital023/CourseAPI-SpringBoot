@@ -13,4 +13,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
     @Query(value = "SELECT * FROM courses WHERE name LIKE %:keyword%", nativeQuery = true)
     List<CourseEntity> findByName(@Param("keyword") String keyword);
 
+    @Query(value = "SELECT * FROM courses WHERE category LIKE %:keyword%", nativeQuery = true)
+    List<CourseEntity> findByCategory(@Param("keyword") String keyword);
+
 }
