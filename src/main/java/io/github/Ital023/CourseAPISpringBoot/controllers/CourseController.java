@@ -5,6 +5,7 @@ import io.github.Ital023.CourseAPISpringBoot.domain.course.CourseEntity;
 import io.github.Ital023.CourseAPISpringBoot.domain.course.CourseRepository;
 import io.github.Ital023.CourseAPISpringBoot.domain.course.CourseStatus;
 import io.github.Ital023.CourseAPISpringBoot.services.CourseService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,33 @@ public class CourseController {
         List<CourseEntity> coursesByName = courseRepository.findByName(name);
         return ResponseEntity.ok().body(coursesByName);
     }
+
+    @PutMapping("/{id}")
+    @Transactional
+    public ResponseEntity alter(@PathVariable UUID id,@RequestBody CourseDTO courseDTO){
+
+        Optional<CourseEntity> courseOptional = courseRepository.findById(id);
+
+        if(courseOptional.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+
+        CourseEntity course = courseOptional.get();
+
+        if(courseDTO.name() != null && courseDTO.category() != null){
+            course.setName(courseDTO.name());
+            course.setCategory(courseDTO.category());
+        }
+        else if(courseDTO.name() == null){
+            course.setCategory(courseDTO.category());
+        }else{
+            course.setName(courseDTO.name());
+        }
+
+        return ResponseEntity.noContent().build();
+    }
+
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity delete(@PathVariable UUID id){
