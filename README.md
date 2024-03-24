@@ -39,7 +39,7 @@ Antes de começar, verifique se você atendeu aos seguintes requisitos:
 Para instalar o Cryptography-DesafioBackEnd, siga estas etapas:
 Git:
 ```
-git clone https://github.com/Ital023/DesafioRocketSeat-SpringBoot.git
+git clone https://github.com/Ital023/CourseAPI-SpringBoot.git
 ```
 
 ## ☕ Usando CoursesAPI-DesafioBackEnd
